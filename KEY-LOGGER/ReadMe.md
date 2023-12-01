@@ -26,5 +26,5 @@ Contributions to the project are welcome. If you have ideas for advancements or 
 
 ## Contact Information
 
-- Email: [pateladitya2004@gmail.com](mailto:pateladitya2004@gmail.com)
-- Github: [MadCypher56](https://github.com/MadCypher56)
+- Email: [dishantptl04@gmail.com](mailto:dishantptl2004@gmail.com)
+- Github: [Dishant78](https://github.com/Dishant78)
